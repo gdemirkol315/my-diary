@@ -80,6 +80,9 @@ class MainActivity : ComponentActivity() {
                             onNavigateToEntryDetail = { entryId ->
                                 navController.navigate(Screen.EntryDetail.createEntryDetailRoute(entryId))
                             },
+                            onNavigateToEntryEdit = { entryId ->
+                                navController.navigate(Screen.EntryDetail.createEntryEditRoute(entryId))
+                            },
                             loadEntries = {
                                 entries = it
                             }
@@ -107,6 +110,21 @@ class MainActivity : ComponentActivity() {
                             }
                         )
                     }
+                    composable(
+                        route = Screen.EntryEdit.route,
+                        arguments = listOf(
+                            navArgument("entryId") { type = NavType.IntType }
+                        )
+                    ) { backStackEntry ->
+                        val entryId = backStackEntry.arguments?.getInt("entryId") ?: 0
+                        val entry = entries[entryId]
+                        EntryScreen(
+                            entry = entry,
+                            onNavigateBack = {
+                                navController.navigateUp()
+                            }
+                        )
+                    }
                 }
             }
         }
@@ -117,6 +135,7 @@ class MainActivity : ComponentActivity() {
     fun StartScreen(
         onNavigateToEntry: () -> Unit,
         onNavigateToEntryDetail: (Int) -> Unit,
+        onNavigateToEntryEdit: (Int) -> Unit,
         loadEntries: (List<Entry>) -> Unit
     ) {
         // This will be triggered every time this composable enters composition
@@ -154,7 +173,8 @@ class MainActivity : ComponentActivity() {
                     Modifier
                         .padding(paddingValues)
                         .fillMaxSize(),
-                    onNavigateToEntryDetail = onNavigateToEntryDetail
+                    onNavigateToEntryDetail = onNavigateToEntryDetail,
+                    onNavigateToEntryEdit = onNavigateToEntryEdit
                 )
             }
         )
@@ -170,7 +190,8 @@ class MainActivity : ComponentActivity() {
     @Composable
     fun EntryTable(
         modifier: Modifier = Modifier,
-        onNavigateToEntryDetail: (Int) -> Unit
+        onNavigateToEntryDetail: (Int) -> Unit,
+        onNavigateToEntryEdit: (Int) -> Unit
     ) {
         val groupedItems = entries
             .mapIndexed { index, entry -> index to entry }
@@ -202,7 +223,7 @@ class MainActivity : ComponentActivity() {
                         HorizontalDivider()
                     }
                     is EntryListItem.EntryItem -> {
-                        EntryRow(item.entry, item.index, onNavigateToEntryDetail)
+                        EntryRow(item.entry, item.index, onNavigateToEntryDetail, onNavigateToEntryEdit)
                     }
                 }
             }
@@ -213,7 +234,8 @@ class MainActivity : ComponentActivity() {
     fun EntryRow(
         entry: Entry,
         index: Int,
-        onNavigateToEntryDetail: (Int) -> Unit
+        onNavigateToEntryDetail: (Int) -> Unit,
+        onNavigateToEntryEdit: (Int) -> Unit
     ) {
         Row(
             modifier = Modifier
@@ -237,7 +259,7 @@ class MainActivity : ComponentActivity() {
             }
 
             IconButton(
-                onClick = { /* TODO: Handle edit click */ }
+                onClick = { onNavigateToEntryEdit(index) }
             ) {
                 Icon(
                     imageVector = Icons.Default.Edit,

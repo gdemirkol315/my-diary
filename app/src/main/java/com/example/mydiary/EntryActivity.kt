@@ -11,13 +11,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.mydiary.dto.Entry
 import com.example.mydiary.utils.DateUtils
 import com.example.mydiary.viewmodel.EntryViewModel
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EntryScreen(onNavigateBack: () -> Unit) {
+fun EntryScreen(onNavigateBack: () -> Unit, entry: Entry? = null) {
     val context = LocalContext.current
     val viewModel: EntryViewModel = viewModel(
         factory = EntryViewModel.provideFactory(context.applicationContext as Application)
@@ -34,12 +35,17 @@ fun EntryScreen(onNavigateBack: () -> Unit) {
             )
         }
     }
+    if (entry != null && uiState.title.isEmpty() && uiState.content.isEmpty()) {
+        viewModel.updateTitle(entry.title)
+        viewModel.updateContent(entry.content)
+    }
+    var topbarText =  entry?.let { "Edit Entry" } ?: "New Entry"
 
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
-                title = { Text("New Entry") },
+                title = { Text(topbarText) },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primary,
                     titleContentColor = Color.White,
@@ -98,7 +104,13 @@ fun EntryScreen(onNavigateBack: () -> Unit) {
                 )
 
                 Button(
-                    onClick = { viewModel.saveEntry(onSuccess = onNavigateBack) },
+                    onClick = {
+                        if (entry != null && entry.id != 0L) {
+                            viewModel.updateEntry(entry.id, onSuccess = onNavigateBack)
+                        } else {
+                            viewModel.saveEntry(onSuccess = onNavigateBack)
+                        }
+                              },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(bottom = 16.dp),

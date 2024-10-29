@@ -52,6 +52,17 @@ class EntryViewModel(application: Application) : AndroidViewModel(application) {
         _uiState.value = _uiState.value.copy(content = content)
     }
 
+    fun updateEntry(entryId: Long, onSuccess: () -> Unit) {
+        viewModelScope.launch {
+            try {
+                repository.updateEntry(Entry(entryId, _uiState.value.title, _uiState.value.content, _uiState.value.date))
+                onSuccess()
+            } catch (e: Exception){
+                Log.e("EntryViewModel", "Error updating entry",e)
+            }
+            }
+    }
+
     fun deleteEntry(entry: Entry, onSuccess: () -> Unit) {
         viewModelScope.launch {
             try {
