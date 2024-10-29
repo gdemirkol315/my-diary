@@ -4,6 +4,8 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -42,7 +44,15 @@ fun EntryScreen() {
                     titleContentColor = Color.White,
                     navigationIconContentColor = Color.White,
                     actionIconContentColor = Color.White
-                )
+                ),
+                actions = {
+                    IconButton(onClick = { /* TODO: Handle action click */ }) {
+                        Icon(
+                            imageVector = Icons.Default.Home,
+                            contentDescription = "Home"
+                        )
+                    }
+                }
             )
         }
     ) { paddingValues ->
@@ -83,7 +93,7 @@ fun EntryScreen() {
             )
 
             Button(
-                onClick = { /* Will be implemented later */ },
+                onClick = { /*TODO: Will be implemented later */ },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 16.dp)
