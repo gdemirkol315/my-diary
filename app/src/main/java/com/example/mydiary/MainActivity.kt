@@ -27,13 +27,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.mydiary.dto.Entry
 import com.example.mydiary.ui.theme.MyDiaryTheme
 import com.example.mydiary.utils.DateUtils
+import java.text.SimpleDateFormat
 import java.util.Date
-
+import java.util.Locale
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -57,31 +60,35 @@ class MainActivity : ComponentActivity() {
                         actions = {
                             IconButton(onClick = { /* Handle action click */ }) {
                                 Icon(
-                                    imageVector = Icons.Default.Search, // Add icons for actions here
+                                    imageVector = Icons.Default.Search,
                                     contentDescription = "Search"
                                 )
                             }
                         },
                         colors = TopAppBarDefaults.topAppBarColors(
-                            containerColor = MaterialTheme.colorScheme.primary, // Background color of the TopAppBar
-                            titleContentColor = Color.White, // Title text color
-                            navigationIconContentColor = Color.White, // Navigation icon color
-                            actionIconContentColor = Color.White // Action icon color
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            titleContentColor = Color.White,
+                            navigationIconContentColor = Color.White,
+                            actionIconContentColor = Color.White
                         )
                     )
                 },
                 content = { paddingValues ->
                     EntryTable(
                         Modifier
-                            .padding(paddingValues) // Apply padding to avoid overlapping with TopAppBar
+                            .padding(paddingValues)
                             .fillMaxSize()
                     )
                 }
             )
             AddButton(onClick = { /* Handle add entry click */ })
         }
+    }
 
-
+    data class MonthHeader(val monthYear: String)
+    sealed class EntryListItem {
+        data class Header(val monthHeader: MonthHeader) : EntryListItem()
+        data class EntryItem(val entry: Entry) : EntryListItem()
     }
 
     @Composable
@@ -91,12 +98,39 @@ class MainActivity : ComponentActivity() {
             Entry("Title 2", "Content 2", Date())
         )
 
+        val groupedItems = entries
+            .sortedByDescending { it.date }
+            .groupBy { entry ->
+                val formatter = SimpleDateFormat("MMMM yyyy", Locale.ENGLISH)
+                formatter.format(entry.date)
+            }
+            .flatMap { (monthYear, monthEntries) ->
+                listOf(EntryListItem.Header(MonthHeader(monthYear))) +
+                        monthEntries.map { EntryListItem.EntryItem(it) }
+            }
+
         LazyColumn(
             modifier = modifier.fillMaxSize(),
             horizontalAlignment = Alignment.Start,
-
-            ) {
-            items(entries.size) { index -> EntryRow(entries[index]) }
+        ) {
+            items(groupedItems.size) { index ->
+                when (val item = groupedItems[index]) {
+                    is EntryListItem.Header -> {
+                        Text(
+                            text = item.monthHeader.monthYear,
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 8.dp, horizontal = 8.dp)
+                        )
+                        HorizontalDivider()
+                    }
+                    is EntryListItem.EntryItem -> {
+                        EntryRow(item.entry)
+                    }
+                }
+            }
         }
     }
 
