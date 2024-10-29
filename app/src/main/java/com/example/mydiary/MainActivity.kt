@@ -27,6 +27,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -49,10 +50,6 @@ import com.example.mydiary.utils.DateUtils
 import com.example.mydiary.viewmodel.EntryViewModel
 import java.text.SimpleDateFormat
 import java.util.Locale
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 class MainActivity : ComponentActivity() {
 
@@ -82,6 +79,9 @@ class MainActivity : ComponentActivity() {
                             },
                             onNavigateToEntryDetail = { entryId ->
                                 navController.navigate(Screen.EntryDetail.createEntryDetailRoute(entryId))
+                            },
+                            loadEntries = {
+                                entries = it
                             }
                         )
                     }
@@ -112,21 +112,23 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    override fun onResume() {
-        super.onResume()
-        CoroutineScope(Dispatchers.Main).launch {
-            entries = withContext(Dispatchers.IO) {
-                viewModel.loadEntries()
-            }
-        }
-    }
-
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun StartScreen(
         onNavigateToEntry: () -> Unit,
-        onNavigateToEntryDetail: (Int) -> Unit
+        onNavigateToEntryDetail: (Int) -> Unit,
+        loadEntries: (List<Entry>) -> Unit
     ) {
+        // This will be triggered every time this composable enters composition
+        LaunchedEffect(Unit) {
+            try {
+                val dbEntries = viewModel.loadEntries()
+                loadEntries(dbEntries)
+            } catch (e: Exception) {
+                // Handle error if needed
+            }
+        }
+
         Scaffold(
             topBar = {
                 TopAppBar(
