@@ -52,6 +52,17 @@ class EntryViewModel(application: Application) : AndroidViewModel(application) {
         _uiState.value = _uiState.value.copy(content = content)
     }
 
+    fun deleteEntry(entry: Entry, onSuccess: () -> Unit) {
+        viewModelScope.launch {
+            try {
+                repository.deleteEntry(entry)
+                onSuccess()
+            } catch (e: Exception){
+                Log.e("EntryViewModel", "Error deleting entry",e)
+            }
+        }
+    }
+
     fun saveEntry(onSuccess: () -> Unit) {
         viewModelScope.launch {
             try {

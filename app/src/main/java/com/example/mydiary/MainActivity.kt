@@ -247,7 +247,7 @@ class MainActivity : ComponentActivity() {
             }
 
             IconButton(
-                onClick = { /* TODO: Handle delete click */ }
+                onClick = { viewModel.deleteEntry(entry, onSuccess = { entries = entries.filter { it != entry } })}
             ) {
                 Icon(
                     imageVector = Icons.Default.Delete,
