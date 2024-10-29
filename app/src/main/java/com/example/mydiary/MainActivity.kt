@@ -33,9 +33,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.mydiary.dto.Entry
 import com.example.mydiary.navigation.Screen
 import com.example.mydiary.ui.theme.MyDiaryTheme
@@ -66,11 +68,29 @@ class MainActivity : ComponentActivity() {
                         StartScreen(
                             onNavigateToEntry = {
                                 navController.navigate(Screen.Entry.route)
+                            },
+                            onNavigateToEntryDetail = { entryId ->
+                                navController.navigate(Screen.EntryDetail.createEntryDetailRoute(entryId))
                             }
                         )
                     }
                     composable(Screen.Entry.route) {
                         EntryScreen(
+                            onNavigateBack = {
+                                navController.navigateUp()
+                            }
+                        )
+                    }
+                    composable(
+                        route = Screen.EntryDetail.route,
+                        arguments = listOf(
+                            navArgument("entryId") { type = NavType.IntType }
+                        )
+                    ) { backStackEntry ->
+                        val entryId = backStackEntry.arguments?.getInt("entryId") ?: 0
+                        val entry = entries[entryId]
+                        EntryDetailScreen(
+                            entry = entry,
                             onNavigateBack = {
                                 navController.navigateUp()
                             }
@@ -83,7 +103,10 @@ class MainActivity : ComponentActivity() {
 
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
-    fun StartScreen(onNavigateToEntry: () -> Unit) {
+    fun StartScreen(
+        onNavigateToEntry: () -> Unit,
+        onNavigateToEntryDetail: (Int) -> Unit
+    ) {
         Scaffold(
             topBar = {
                 TopAppBar(
@@ -108,7 +131,8 @@ class MainActivity : ComponentActivity() {
                 EntryTable(
                     Modifier
                         .padding(paddingValues)
-                        .fillMaxSize()
+                        .fillMaxSize(),
+                    onNavigateToEntryDetail = onNavigateToEntryDetail
                 )
             }
         )
@@ -118,20 +142,24 @@ class MainActivity : ComponentActivity() {
     data class MonthHeader(val monthYear: String)
     sealed class EntryListItem {
         data class Header(val monthHeader: MonthHeader) : EntryListItem()
-        data class EntryItem(val entry: Entry) : EntryListItem()
+        data class EntryItem(val entry: Entry, val index: Int) : EntryListItem()
     }
 
     @Composable
-    fun EntryTable(modifier: Modifier = Modifier) {
+    fun EntryTable(
+        modifier: Modifier = Modifier,
+        onNavigateToEntryDetail: (Int) -> Unit
+    ) {
         val groupedItems = entries
-            .sortedByDescending { it.date }
-            .groupBy { entry ->
+            .mapIndexed { index, entry -> index to entry }
+            .sortedByDescending { it.second.date }
+            .groupBy { (_, entry) ->
                 val formatter = SimpleDateFormat("MMMM yyyy", Locale.ENGLISH)
                 formatter.format(entry.date)
             }
             .flatMap { (monthYear, monthEntries) ->
                 listOf(EntryListItem.Header(MonthHeader(monthYear))) +
-                        monthEntries.map { EntryListItem.EntryItem(it) }
+                        monthEntries.map { (index, entry) -> EntryListItem.EntryItem(entry, index) }
             }
 
         LazyColumn(
@@ -152,7 +180,7 @@ class MainActivity : ComponentActivity() {
                         HorizontalDivider()
                     }
                     is EntryListItem.EntryItem -> {
-                        EntryRow(item.entry)
+                        EntryRow(item.entry, item.index, onNavigateToEntryDetail)
                     }
                 }
             }
@@ -160,7 +188,11 @@ class MainActivity : ComponentActivity() {
     }
 
     @Composable
-    fun EntryRow(entry: Entry) {
+    fun EntryRow(
+        entry: Entry,
+        index: Int,
+        onNavigateToEntryDetail: (Int) -> Unit
+    ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -173,11 +205,11 @@ class MainActivity : ComponentActivity() {
             )
 
             IconButton(
-                onClick = { /* TODO: Handle read click */ }
+                onClick = { onNavigateToEntryDetail(index) }
             ) {
                 Icon(
                     imageVector = Icons.Filled.DateRange,
-                    contentDescription = "Read entry",
+                    contentDescription = "View entry details",
                     tint = MaterialTheme.colorScheme.tertiary
                 )
             }
