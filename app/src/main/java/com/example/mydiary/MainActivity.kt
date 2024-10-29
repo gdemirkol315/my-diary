@@ -49,9 +49,9 @@ import java.util.Locale
 class MainActivity : ComponentActivity() {
 
     val entries: List<Entry> = listOf(
-        Entry("Title 1", "Content 1", Date()),
-        Entry("Title 2", "Content 2", Date())
-    )
+        Entry(1, "Title 1", "This is my content 1", Date()),
+        Entry(2, "Title 2", "This is my content 2",Date()))
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
