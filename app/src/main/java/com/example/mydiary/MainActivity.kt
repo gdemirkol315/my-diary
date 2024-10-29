@@ -12,6 +12,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
@@ -39,6 +42,12 @@ import java.util.Date
 import java.util.Locale
 
 class MainActivity : ComponentActivity() {
+
+    val entries: List<Entry> = listOf(
+        Entry("Title 1", "Content 1", Date()),
+        Entry("Title 2", "Content 2", Date())
+    )
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -93,10 +102,6 @@ class MainActivity : ComponentActivity() {
 
     @Composable
     fun EntryTable(modifier: Modifier = Modifier) {
-        val entries: List<Entry> = listOf(
-            Entry("Title 1", "Content 1", Date()),
-            Entry("Title 2", "Content 2", Date())
-        )
 
         val groupedItems = entries
             .sortedByDescending { it.date }
@@ -139,14 +144,44 @@ class MainActivity : ComponentActivity() {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 16.dp, horizontal = 8.dp)
+                .padding(vertical = 16.dp, horizontal = 8.dp),
+            verticalAlignment = Alignment.CenterVertically // Added to center-align content vertically
         ) {
-
+            // Title and date
             Text(
-                text = entry.title
-                        + " - " + DateUtils.reformatDateString(entry.date.toString()),
+                text = entry.title + " - " + DateUtils.reformatDateString(entry.date.toString()),
+                modifier = Modifier.weight(1f) // This will push the buttons to the right
             )
 
+            IconButton(
+                onClick = { /* TODO: Handle read click */ }
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.DateRange,
+                    contentDescription = "Read entry",
+                    tint = MaterialTheme.colorScheme.tertiary
+                )
+            }
+
+            IconButton(
+                onClick = { /* TODO: Handle edit click */ }
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Edit,
+                    contentDescription = "Edit entry",
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
+
+            IconButton(
+                onClick = { /* TODO: Handle delete click */ }
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Delete,
+                    contentDescription = "Delete entry",
+                    tint = MaterialTheme.colorScheme.error
+                )
+            }
         }
         HorizontalDivider()
     }
