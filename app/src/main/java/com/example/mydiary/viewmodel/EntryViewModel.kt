@@ -11,6 +11,7 @@ import com.example.mydiary.dto.Entry
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.util.Date
 
@@ -37,6 +38,10 @@ class EntryViewModel(application: Application) : AndroidViewModel(application) {
         }
 
         repository = EntryRepository(database!!.entryDao())
+    }
+
+    suspend fun loadEntries(): List<Entry> {
+        return repository.getAllEntries().first()
     }
 
     fun updateTitle(title: String) {

@@ -27,12 +27,16 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -42,19 +46,26 @@ import com.example.mydiary.dto.Entry
 import com.example.mydiary.navigation.Screen
 import com.example.mydiary.ui.theme.MyDiaryTheme
 import com.example.mydiary.utils.DateUtils
+import com.example.mydiary.viewmodel.EntryViewModel
 import java.text.SimpleDateFormat
-import java.util.Date
 import java.util.Locale
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class MainActivity : ComponentActivity() {
 
-    val entries: List<Entry> = listOf(
-        Entry(1, "Title 1", "This is my content 1", Date()),
-        Entry(2, "Title 2", "This is my content 2",Date()))
-
+    private var entries by mutableStateOf<List<Entry>>(emptyList())
+    private lateinit var viewModel: EntryViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        viewModel = ViewModelProvider(
+            this,
+            EntryViewModel.provideFactory(application)
+        )[EntryViewModel::class.java]
+
         enableEdgeToEdge()
         setContent {
             MyDiaryTheme {
@@ -97,6 +108,15 @@ class MainActivity : ComponentActivity() {
                         )
                     }
                 }
+            }
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        CoroutineScope(Dispatchers.Main).launch {
+            entries = withContext(Dispatchers.IO) {
+                viewModel.loadEntries()
             }
         }
     }
