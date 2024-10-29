@@ -31,10 +31,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.example.mydiary.dto.Entry
+import com.example.mydiary.navigation.Screen
 import com.example.mydiary.ui.theme.MyDiaryTheme
 import com.example.mydiary.utils.DateUtils
 import java.text.SimpleDateFormat
@@ -52,46 +55,64 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            StartScreen()
+            MyDiaryTheme {
+                val navController = rememberNavController()
+                
+                NavHost(
+                    navController = navController,
+                    startDestination = Screen.Main.route
+                ) {
+                    composable(Screen.Main.route) {
+                        StartScreen(
+                            onNavigateToEntry = {
+                                navController.navigate(Screen.Entry.route)
+                            }
+                        )
+                    }
+                    composable(Screen.Entry.route) {
+                        EntryScreen(
+                            onNavigateBack = {
+                                navController.navigateUp()
+                            }
+                        )
+                    }
+                }
+            }
         }
     }
 
     @OptIn(ExperimentalMaterial3Api::class)
-    @Preview
     @Composable
-    fun StartScreen() {
-
-        MyDiaryTheme {
-            Scaffold(
-                topBar = {
-                    TopAppBar(
-                        title = { Text("My Diary") },
-                        actions = {
-                            IconButton(onClick = { /* Handle action click */ }) {
-                                Icon(
-                                    imageVector = Icons.Default.Search,
-                                    contentDescription = "Search"
-                                )
-                            }
-                        },
-                        colors = TopAppBarDefaults.topAppBarColors(
-                            containerColor = MaterialTheme.colorScheme.primary,
-                            titleContentColor = Color.White,
-                            navigationIconContentColor = Color.White,
-                            actionIconContentColor = Color.White
-                        )
+    fun StartScreen(onNavigateToEntry: () -> Unit) {
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    title = { Text("My Diary") },
+                    actions = {
+                        IconButton(onClick = { /* Handle action click */ }) {
+                            Icon(
+                                imageVector = Icons.Default.Search,
+                                contentDescription = "Search"
+                            )
+                        }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        titleContentColor = Color.White,
+                        navigationIconContentColor = Color.White,
+                        actionIconContentColor = Color.White
                     )
-                },
-                content = { paddingValues ->
-                    EntryTable(
-                        Modifier
-                            .padding(paddingValues)
-                            .fillMaxSize()
-                    )
-                }
-            )
-            AddButton(onClick = { /* Handle add entry click */ })
-        }
+                )
+            },
+            content = { paddingValues ->
+                EntryTable(
+                    Modifier
+                        .padding(paddingValues)
+                        .fillMaxSize()
+                )
+            }
+        )
+        AddButton(onClick = onNavigateToEntry)
     }
 
     data class MonthHeader(val monthYear: String)
@@ -102,7 +123,6 @@ class MainActivity : ComponentActivity() {
 
     @Composable
     fun EntryTable(modifier: Modifier = Modifier) {
-
         val groupedItems = entries
             .sortedByDescending { it.date }
             .groupBy { entry ->
@@ -145,12 +165,11 @@ class MainActivity : ComponentActivity() {
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = 16.dp, horizontal = 8.dp),
-            verticalAlignment = Alignment.CenterVertically // Added to center-align content vertically
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            // Title and date
             Text(
                 text = entry.title + " - " + DateUtils.reformatDateString(entry.date.toString()),
-                modifier = Modifier.weight(1f) // This will push the buttons to the right
+                modifier = Modifier.weight(1f)
             )
 
             IconButton(

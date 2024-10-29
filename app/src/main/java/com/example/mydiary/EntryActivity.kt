@@ -1,8 +1,5 @@
 package com.example.mydiary
 
-import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
@@ -10,27 +7,13 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.mydiary.ui.theme.MyDiaryTheme
 import com.example.mydiary.utils.DateUtils
 import java.util.Date
 
-class EntryActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContent {
-            MyDiaryTheme {
-                EntryScreen()
-            }
-        }
-    }
-}
-
-@Preview
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EntryScreen() {
+fun EntryScreen(onNavigateBack: () -> Unit) {
     var title by remember { mutableStateOf("") }
     var content by remember { mutableStateOf("") }
     val currentDate = DateUtils.reformatDateString(Date().toString())
@@ -46,7 +29,7 @@ fun EntryScreen() {
                     actionIconContentColor = Color.White
                 ),
                 actions = {
-                    IconButton(onClick = { /* TODO: Handle action click */ }) {
+                    IconButton(onClick = onNavigateBack) {
                         Icon(
                             imageVector = Icons.Default.Home,
                             contentDescription = "Home"
@@ -93,7 +76,7 @@ fun EntryScreen() {
             )
 
             Button(
-                onClick = { /*TODO: Will be implemented later */ },
+                onClick = onNavigateBack,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 16.dp)
