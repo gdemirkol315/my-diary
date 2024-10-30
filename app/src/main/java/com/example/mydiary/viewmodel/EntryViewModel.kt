@@ -9,7 +9,7 @@ import com.example.mydiary.data.database.AppDatabase
 import com.example.mydiary.data.repository.EntryRepository
 import com.example.mydiary.dto.Entry
 import com.example.mydiary.manager.ToastManager
-import com.example.mydiary.state.ToastType
+import com.example.mydiary.manager.ToastType
 
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
