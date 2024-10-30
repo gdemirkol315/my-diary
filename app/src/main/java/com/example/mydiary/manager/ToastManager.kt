@@ -1,7 +1,5 @@
 package com.example.mydiary.manager
 
-import com.example.mydiary.state.ToastData
-import com.example.mydiary.state.ToastType
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 
