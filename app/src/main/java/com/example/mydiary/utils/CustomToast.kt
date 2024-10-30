@@ -35,7 +35,7 @@ fun CustomToast(
 
     if (isVisible) {
         Popup(
-            alignment = Alignment.TopCenter
+            alignment = Alignment.BottomCenter
         ) {
             Surface(
                 modifier = Modifier.padding(16.dp),

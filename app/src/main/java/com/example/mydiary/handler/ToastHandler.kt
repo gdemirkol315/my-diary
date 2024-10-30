@@ -6,6 +6,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import com.example.mydiary.manager.ToastManager
 import com.example.mydiary.utils.CustomToast
+import kotlinx.coroutines.launch
 
 @Composable
 fun ToastHandler() {
@@ -16,7 +17,11 @@ fun ToastHandler() {
         CustomToast(
             message = data.message,
             type = data.type,
-            onDismiss = { /* dismiss logic */ }
+            onDismiss = {
+                scope.launch {
+                    ToastManager.clearToast()
+                }
+            }
         )
     }
 }
