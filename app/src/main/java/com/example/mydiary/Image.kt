@@ -19,8 +19,9 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Image
+import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
@@ -61,7 +62,7 @@ fun ImagePickerDialog(
                         onDismiss()
                     }
                 ) {
-                    Icon(Icons.Default.AddCircle, contentDescription = null)
+                    Icon(Icons.Default.Image, contentDescription = null)
                     Spacer(Modifier.width(8.dp))
                     Text("Choose from Gallery")
                 }
@@ -74,7 +75,7 @@ fun ImagePickerDialog(
                         onDismiss()
                     }
                 ) {
-                    Icon(Icons.Default.AddCircle, contentDescription = null)
+                    Icon(Icons.Default.PhotoCamera, contentDescription = null)
                     Spacer(Modifier.width(8.dp))
                     Text("Take Photo")
                 }

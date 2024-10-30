@@ -14,6 +14,7 @@ lifecycle = "2.8.0-alpha02"
 jetbrains-annotations = "23.0.0"
 ksp = "2.0.0-Beta4-1.0.17"
 coil = "2.5.0"
+material-icons = "1.6.3"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -38,6 +39,8 @@ androidx-room-compiler = { group = "androidx.room", name = "room-compiler", vers
 androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
 jetbrains-annotations = { group = "org.jetbrains", name = "annotations", version.ref = "jetbrains-annotations" }
 coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
+androidx-material-icons-core = { group = "androidx.compose.material", name = "material-icons-core", version.ref = "material-icons" }
+androidx-material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended", version.ref = "material-icons" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

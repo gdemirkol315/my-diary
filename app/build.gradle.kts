@@ -67,6 +67,8 @@ dependencies {
     annotationProcessor(libs.androidx.room.compiler)
 
     implementation(libs.coil.compose)
+    implementation(libs.androidx.material.icons.core)
+    implementation(libs.androidx.material.icons.extended)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
