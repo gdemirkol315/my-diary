@@ -1,7 +1,7 @@
 package com.example.mydiary.data.repository
 
 import com.example.mydiary.data.dao.EntryDao
-import com.example.mydiary.dto.Entry
+import com.example.mydiary.data.entities.Entry
 import kotlinx.coroutines.flow.Flow
 
 class EntryRepository(private val entryDao: EntryDao) {

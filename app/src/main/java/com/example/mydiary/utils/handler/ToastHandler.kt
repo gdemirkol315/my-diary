@@ -1,10 +1,10 @@
-package com.example.mydiary.handler
+package com.example.mydiary.utils.handler
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
-import com.example.mydiary.manager.ToastManager
+import com.example.mydiary.utils.manager.ToastManager
 import com.example.mydiary.utils.CustomToast
 import kotlinx.coroutines.launch
 

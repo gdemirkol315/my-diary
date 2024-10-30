@@ -1,4 +1,4 @@
-package com.example.mydiary
+package com.example.mydiary.activities.entrydetail
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -11,7 +11,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.example.mydiary.dto.Entry
+import com.example.mydiary.data.entities.Entry
 import com.example.mydiary.utils.DateUtils
 
 @OptIn(ExperimentalMaterial3Api::class)

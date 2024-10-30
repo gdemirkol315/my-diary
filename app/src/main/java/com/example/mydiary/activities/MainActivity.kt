@@ -1,4 +1,4 @@
-package com.example.mydiary
+package com.example.mydiary.activities
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -47,8 +47,10 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.example.mydiary.dto.Entry
-import com.example.mydiary.handler.ToastHandler
+import com.example.mydiary.activities.entrydetail.EntryDetailScreen
+import com.example.mydiary.data.entities.Entry
+import com.example.mydiary.activities.entry.EntryScreen
+import com.example.mydiary.utils.handler.ToastHandler
 import com.example.mydiary.navigation.Screen
 import com.example.mydiary.ui.theme.MyDiaryTheme
 import com.example.mydiary.utils.DateUtils

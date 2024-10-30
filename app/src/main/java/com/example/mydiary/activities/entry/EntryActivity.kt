@@ -1,4 +1,4 @@
-package com.example.mydiary
+package com.example.mydiary.activities.entry
 
 import android.app.Application
 import android.net.Uri
@@ -12,7 +12,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.mydiary.dto.Entry
+import com.example.mydiary.activities.entry.component.ImageCarousel
+import com.example.mydiary.activities.entry.component.ImagePickerDialog
+import com.example.mydiary.data.entities.Entry
 import com.example.mydiary.utils.DateUtils
 import com.example.mydiary.viewmodel.EntryViewModel
 

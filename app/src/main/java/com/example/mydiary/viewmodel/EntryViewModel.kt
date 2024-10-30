@@ -7,9 +7,9 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.mydiary.data.database.AppDatabase
 import com.example.mydiary.data.repository.EntryRepository
-import com.example.mydiary.dto.Entry
-import com.example.mydiary.manager.ToastManager
-import com.example.mydiary.manager.ToastType
+import com.example.mydiary.data.entities.Entry
+import com.example.mydiary.utils.manager.ToastManager
+import com.example.mydiary.utils.manager.ToastType
 
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

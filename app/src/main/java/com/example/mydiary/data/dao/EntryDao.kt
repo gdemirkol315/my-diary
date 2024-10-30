@@ -6,7 +6,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
-import com.example.mydiary.dto.Entry
+import com.example.mydiary.data.entities.Entry
 import kotlinx.coroutines.flow.Flow
 
 @Dao

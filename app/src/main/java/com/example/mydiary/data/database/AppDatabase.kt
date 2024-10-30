@@ -7,7 +7,7 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import com.example.mydiary.data.converter.DateConverter
 import com.example.mydiary.data.dao.EntryDao
-import com.example.mydiary.dto.Entry
+import com.example.mydiary.data.entities.Entry
 
 @Database(entities = [Entry::class], version = 1, exportSchema = false)
 @TypeConverters(DateConverter::class)

@@ -1,4 +1,4 @@
-package com.example.mydiary
+package com.example.mydiary.activities.entry.component
 
 import android.net.Uri
 import androidx.compose.foundation.ExperimentalFoundationApi

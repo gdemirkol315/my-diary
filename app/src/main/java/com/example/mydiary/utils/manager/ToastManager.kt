@@ -1,4 +1,4 @@
-package com.example.mydiary.manager
+package com.example.mydiary.utils.manager
 
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
