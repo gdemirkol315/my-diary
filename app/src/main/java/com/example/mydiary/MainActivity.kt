@@ -44,6 +44,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.mydiary.dto.Entry
+import com.example.mydiary.handler.ToastHandler
 import com.example.mydiary.navigation.Screen
 import com.example.mydiary.ui.theme.MyDiaryTheme
 import com.example.mydiary.utils.DateUtils
@@ -67,7 +68,8 @@ class MainActivity : ComponentActivity() {
         setContent {
             MyDiaryTheme {
                 val navController = rememberNavController()
-                
+                ToastHandler()
+
                 NavHost(
                     navController = navController,
                     startDestination = Screen.Main.route

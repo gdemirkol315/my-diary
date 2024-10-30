@@ -8,6 +8,9 @@ import androidx.lifecycle.viewModelScope
 import com.example.mydiary.data.database.AppDatabase
 import com.example.mydiary.data.repository.EntryRepository
 import com.example.mydiary.dto.Entry
+import com.example.mydiary.manager.ToastManager
+import com.example.mydiary.state.ToastType
+
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -60,13 +63,14 @@ class EntryViewModel(application: Application) : AndroidViewModel(application) {
             } catch (e: Exception){
                 Log.e("EntryViewModel", "Error updating entry",e)
             }
-            }
+        }
     }
 
     fun deleteEntry(entry: Entry, onSuccess: () -> Unit) {
         viewModelScope.launch {
             try {
                 repository.deleteEntry(entry)
+                ToastManager.showToast("Successfully deleted!", ToastType.Success)
                 onSuccess()
             } catch (e: Exception){
                 Log.e("EntryViewModel", "Error deleting entry",e)
