@@ -59,6 +59,7 @@ class EntryViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             try {
                 repository.updateEntry(Entry(entryId, _uiState.value.title, _uiState.value.content, _uiState.value.date))
+                ToastManager.showToast("Entry was edited successfully", ToastType.Info)
                 onSuccess()
             } catch (e: Exception){
                 Log.e("EntryViewModel", "Error updating entry",e)
@@ -70,9 +71,10 @@ class EntryViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             try {
                 repository.deleteEntry(entry)
-                ToastManager.showToast("Successfully deleted!", ToastType.Success)
+                ToastManager.showToast("Successfully deleted", ToastType.Success)
                 onSuccess()
             } catch (e: Exception){
+                ToastManager.showToast("There was an error deleting the entry!", ToastType.Error)
                 Log.e("EntryViewModel", "Error deleting entry",e)
             }
         }
@@ -91,6 +93,7 @@ class EntryViewModel(application: Application) : AndroidViewModel(application) {
                 
                 repository.insertEntry(entry)
                 _uiState.value = _uiState.value.copy(isLoading = false)
+                ToastManager.showToast("Successfully added entry", ToastType.Success)
                 onSuccess()
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
