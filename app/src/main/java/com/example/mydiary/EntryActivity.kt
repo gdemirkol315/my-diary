@@ -25,9 +25,16 @@ fun EntryScreen(onNavigateBack: () -> Unit, entry: Entry? = null) {
     )
     val uiState by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
+    var topbarText = ""
 
     // Handle error messages
     LaunchedEffect(uiState.error) {
+        //onCreate equivalent for composable
+        if (entry != null) {
+            viewModel.updateTitle(entry.title)
+            viewModel.updateContent(entry.content)
+        }
+        topbarText =  entry?.let { "Edit Entry" } ?: "New Entry"
         uiState.error?.let { error ->
             snackbarHostState.showSnackbar(
                 message = error,
@@ -35,11 +42,7 @@ fun EntryScreen(onNavigateBack: () -> Unit, entry: Entry? = null) {
             )
         }
     }
-    if (entry != null && uiState.title.isEmpty() && uiState.content.isEmpty()) {
-        viewModel.updateTitle(entry.title)
-        viewModel.updateContent(entry.content)
-    }
-    var topbarText =  entry?.let { "Edit Entry" } ?: "New Entry"
+
 
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
