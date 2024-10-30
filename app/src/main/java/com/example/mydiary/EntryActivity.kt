@@ -1,6 +1,7 @@
 package com.example.mydiary
 
 import android.app.Application
+import android.net.Uri
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
@@ -26,6 +27,8 @@ fun EntryScreen(onNavigateBack: () -> Unit, entry: Entry? = null) {
     val uiState by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     var topbarText = ""
+    var showImagePicker by remember { mutableStateOf(false) }
+    var images by remember { mutableStateOf<List<Uri>>(emptyList()) }
 
     // Handle error messages
     LaunchedEffect(uiState.error) {
@@ -105,6 +108,28 @@ fun EntryScreen(onNavigateBack: () -> Unit, entry: Entry? = null) {
                         .padding(bottom = 16.dp),
                     minLines = 5
                 )
+
+
+                ImageCarousel(
+                    images = images,
+                    canAddMore = images.size < 3,
+                    onAddClick = { showImagePicker = true },
+                    onDeleteClick = { uri ->
+                        images = images.filter { it != uri }
+                    }
+                )
+
+                if (showImagePicker) {
+                    ImagePickerDialog(
+                        onDismiss = { showImagePicker = false },
+                        onGalleryClick = {
+                            //TODO
+                        },
+                        onCameraClick = {
+                            // TODO
+                        }
+                    )
+                }
 
                 Button(
                     onClick = {
