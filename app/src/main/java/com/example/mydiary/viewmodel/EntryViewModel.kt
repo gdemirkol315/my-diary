@@ -1,6 +1,7 @@
 package com.example.mydiary.viewmodel
 
 import android.app.Application
+import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -8,8 +9,11 @@ import androidx.lifecycle.viewModelScope
 import com.example.mydiary.data.database.AppDatabase
 import com.example.mydiary.data.repository.EntryRepository
 import com.example.mydiary.data.entities.Entry
+import com.example.mydiary.data.entities.EntryImage
+import com.example.mydiary.data.repository.EntryImageRepository
 import com.example.mydiary.utils.manager.ToastManager
 import com.example.mydiary.utils.manager.ToastType
+import com.example.mydiary.utils.manager.ImageStorageManager
 
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -19,6 +23,7 @@ import kotlinx.coroutines.launch
 import java.util.Date
 
 data class EntryUiState(
+    var id: Long = 0L,
     val title: String = "",
     val content: String = "",
     val date: Date = Date(),
@@ -27,9 +32,11 @@ data class EntryUiState(
 )
 
 class EntryViewModel(application: Application) : AndroidViewModel(application) {
-    private val repository: EntryRepository
+    private val entryRepository: EntryRepository
+    private val entryImageRepository: EntryImageRepository
     private val _uiState = MutableStateFlow(EntryUiState())
     val uiState: StateFlow<EntryUiState> = _uiState.asStateFlow()
+    private val imageStorageManager = ImageStorageManager(application.applicationContext)
 
     init {
         var database: AppDatabase? = null
@@ -40,11 +47,12 @@ class EntryViewModel(application: Application) : AndroidViewModel(application) {
             // Handle the error appropriately
         }
 
-        repository = EntryRepository(database!!.entryDao())
+        entryRepository = EntryRepository(database!!.entryDao())
+        entryImageRepository = EntryImageRepository(database.entryImageDao())
     }
 
     suspend fun loadEntries(): List<Entry> {
-        return repository.getAllEntries().first()
+        return entryRepository.getAllEntries().first()
     }
 
     fun updateTitle(title: String) {
@@ -58,7 +66,7 @@ class EntryViewModel(application: Application) : AndroidViewModel(application) {
     fun updateEntry(entryId: Long, onSuccess: () -> Unit) {
         viewModelScope.launch {
             try {
-                repository.updateEntry(Entry(entryId, _uiState.value.title, _uiState.value.content, _uiState.value.date))
+                entryRepository.updateEntry(Entry(entryId, _uiState.value.title, _uiState.value.content, _uiState.value.date))
                 ToastManager.showToast("Entry was edited successfully", ToastType.Info)
                 onSuccess()
             } catch (e: Exception){
@@ -70,7 +78,7 @@ class EntryViewModel(application: Application) : AndroidViewModel(application) {
     fun deleteEntry(entry: Entry, onSuccess: () -> Unit) {
         viewModelScope.launch {
             try {
-                repository.deleteEntry(entry)
+                entryRepository.deleteEntry(entry)
                 ToastManager.showToast("Successfully deleted", ToastType.Success)
                 onSuccess()
             } catch (e: Exception){
@@ -80,7 +88,7 @@ class EntryViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun saveEntry(onSuccess: () -> Unit) {
+    fun saveEntry(onSuccess: (entryId: Long) -> Unit) {
         viewModelScope.launch {
             try {
                 _uiState.value = _uiState.value.copy(isLoading = true, error = null)
@@ -91,10 +99,10 @@ class EntryViewModel(application: Application) : AndroidViewModel(application) {
                     date = _uiState.value.date
                 )
                 
-                repository.insertEntry(entry)
+                val entryId: Long = entryRepository.insertEntry(entry)
                 _uiState.value = _uiState.value.copy(isLoading = false)
                 ToastManager.showToast("Successfully added entry", ToastType.Success)
-                onSuccess()
+                onSuccess(entryId)
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
@@ -102,6 +110,27 @@ class EntryViewModel(application: Application) : AndroidViewModel(application) {
                 )
             }
         }
+    }
+
+    suspend fun saveImage(entryId: Long, uri: Uri) {
+
+        imageStorageManager.saveImage(uri)?.let { path ->
+            val entryImage = EntryImage(
+                entryId = entryId,
+                imagePath = path
+            )
+            entryImageRepository.insertEntryImage(entryImage)
+        }
+
+    }
+
+    suspend fun deleteImage(entryImage: EntryImage) {
+        imageStorageManager.deleteImage(entryImage.imagePath)
+        entryImageRepository.deleteEntryImage(entryImage)
+    }
+
+    fun getImagesForEntry(entryId: Long): List<EntryImage> {
+        return entryImageRepository.getEntryImagesById(entryId)
     }
 
     companion object {

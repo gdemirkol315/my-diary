@@ -7,12 +7,15 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import com.example.mydiary.data.converter.DateConverter
 import com.example.mydiary.data.dao.EntryDao
+import com.example.mydiary.data.dao.EntryImageDao
 import com.example.mydiary.data.entities.Entry
+import com.example.mydiary.data.entities.EntryImage
 
-@Database(entities = [Entry::class], version = 1, exportSchema = false)
+@Database(entities = [Entry::class, EntryImage::class], version = 2, exportSchema = false)
 @TypeConverters(DateConverter::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun entryDao(): EntryDao
+    abstract fun entryImageDao(): EntryImageDao
 
     companion object {
         @Volatile

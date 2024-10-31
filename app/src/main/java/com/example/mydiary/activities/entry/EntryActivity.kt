@@ -16,6 +16,7 @@ import com.example.mydiary.activities.entry.component.ImagePickerComponent
 import com.example.mydiary.data.entities.Entry
 import com.example.mydiary.utils.DateUtils
 import com.example.mydiary.viewmodel.EntryViewModel
+import kotlinx.coroutines.launch
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -28,10 +29,8 @@ fun EntryScreen(onNavigateBack: () -> Unit, entry: Entry? = null) {
     val uiState by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     var topbarText = ""
-    var showImagePicker by remember { mutableStateOf(false) }
     var images by remember { mutableStateOf<List<Uri>>(emptyList()) }
 
-    // Handle error messages
     LaunchedEffect(uiState.error) {
         //onCreate equivalent for composable
         if (entry != null) {
@@ -109,16 +108,36 @@ fun EntryScreen(onNavigateBack: () -> Unit, entry: Entry? = null) {
                         .padding(bottom = 16.dp),
                     minLines = 5
                 )
-
+                val scope = rememberCoroutineScope()
                 ImagePickerComponent(images = images, onImagesChanged = { images = it })
                 Button(
                     onClick = {
                         if (entry != null && entry.id != 0L) {
-                            viewModel.updateEntry(entry.id, onSuccess = onNavigateBack)
+                            viewModel.updateEntry(entry.id, onSuccess = {
+                                scope.launch {
+                                    saveImages(
+                                        viewModel,
+                                        entry.id,
+                                        images
+                                    )
+                                }
+                                onNavigateBack()
+                            })
                         } else {
-                            viewModel.saveEntry(onSuccess = onNavigateBack)
+                            viewModel.saveEntry(onSuccess = { entryId: Long ->
+                                run {
+                                    scope.launch {
+                                        saveImages(
+                                            viewModel,
+                                            entryId,
+                                            images
+                                        )
+                                    }
+                                    onNavigateBack()
+                                }
+                            })
                         }
-                              },
+                    },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(bottom = 16.dp),
@@ -134,6 +153,16 @@ fun EntryScreen(onNavigateBack: () -> Unit, entry: Entry? = null) {
                     }
                 }
             }
+        }
+    }
+}
+
+
+suspend fun saveImages(viewModel: EntryViewModel, entryId: Long, images: List<Uri>) {
+    if (images.isNotEmpty()) {
+
+        for (image in images) {
+            viewModel.saveImage(entryId, image)
         }
     }
 }

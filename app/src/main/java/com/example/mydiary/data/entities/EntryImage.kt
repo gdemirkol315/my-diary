@@ -1,14 +1,24 @@
 package com.example.mydiary.data.entities
 
 import androidx.room.Entity
+import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
-import java.util.Date
 
-@Entity(tableName = "entry_image")
+@Entity(
+    tableName = "entry_image",
+    foreignKeys = [
+        ForeignKey(
+            entity = Entry::class,
+            parentColumns = ["id"],
+            childColumns = ["entryId"],
+            onDelete = ForeignKey.CASCADE
+        )
+    ]
+)
 data class EntryImage(
     @PrimaryKey(autoGenerate = true)
-    val id: Int,
-    val entryId: Int,
+    val id: Long = 0,
+    val entryId: Long,
     val imagePath: String,
-    val timestamp: Long
+    val timestamp: Long = System.currentTimeMillis()
 )
