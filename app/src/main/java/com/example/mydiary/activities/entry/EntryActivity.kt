@@ -12,8 +12,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.mydiary.activities.entry.component.ImageCarousel
-import com.example.mydiary.activities.entry.component.ImagePickerDialog
+import com.example.mydiary.activities.entry.component.ImagePickerComponent
 import com.example.mydiary.data.entities.Entry
 import com.example.mydiary.utils.DateUtils
 import com.example.mydiary.viewmodel.EntryViewModel
@@ -111,28 +110,7 @@ fun EntryScreen(onNavigateBack: () -> Unit, entry: Entry? = null) {
                     minLines = 5
                 )
 
-
-                ImageCarousel(
-                    images = images,
-                    canAddMore = images.size < 3,
-                    onAddClick = { showImagePicker = true },
-                    onDeleteClick = { uri ->
-                        images = images.filter { it != uri }
-                    }
-                )
-
-                if (showImagePicker) {
-                    ImagePickerDialog(
-                        onDismiss = { showImagePicker = false },
-                        onGalleryClick = {
-                            //TODO
-                        },
-                        onCameraClick = {
-                            // TODO
-                        }
-                    )
-                }
-
+                ImagePickerComponent(images = images, onImagesChanged = { images = it })
                 Button(
                     onClick = {
                         if (entry != null && entry.id != 0L) {

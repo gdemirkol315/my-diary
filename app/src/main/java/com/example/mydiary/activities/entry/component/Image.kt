@@ -90,7 +90,7 @@ fun ImagePickerDialog(
     )
 }
 
-// ImageCarousel.kt
+
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ImageCarousel(

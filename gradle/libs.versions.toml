@@ -15,6 +15,7 @@ jetbrains-annotations = "23.0.0"
 ksp = "2.0.0-Beta4-1.0.17"
 coil = "2.5.0"
 material-icons = "1.6.3"
+accompanist-permissions = "0.34.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -41,6 +42,7 @@ jetbrains-annotations = { group = "org.jetbrains", name = "annotations", version
 coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
 androidx-material-icons-core = { group = "androidx.compose.material", name = "material-icons-core", version.ref = "material-icons" }
 androidx-material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended", version.ref = "material-icons" }
+accompanist-permissions = { group = "com.google.accompanist", name = "accompanist-permissions", version.ref = "accompanist-permissions" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
