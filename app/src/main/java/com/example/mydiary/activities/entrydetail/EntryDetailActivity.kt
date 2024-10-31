@@ -11,12 +11,14 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.example.mydiary.activities.entry.component.ImageCarousel
 import com.example.mydiary.data.entities.Entry
 import com.example.mydiary.utils.DateUtils
+import com.example.mydiary.viewmodel.EntryViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EntryDetailScreen(entry: Entry, onNavigateBack: () -> Unit) {
+fun EntryDetailScreen(entry: Entry, viewModel: EntryViewModel, onNavigateBack: () -> Unit) {
     Scaffold(
         topBar = {
             TopAppBar(
@@ -74,6 +76,12 @@ fun EntryDetailScreen(entry: Entry, onNavigateBack: () -> Unit) {
                     .weight(1f)
                     .padding(bottom = 16.dp),
                 minLines = 5
+            )
+            viewModel.loadImagesForEntry(entryId = entry.id)
+            var images = viewModel.entryImages.collectAsState().value
+
+            ImageCarousel(
+                images = images
             )
         }
     }

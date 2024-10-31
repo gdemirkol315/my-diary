@@ -114,6 +114,7 @@ class MainActivity : ComponentActivity() {
                         val entry = entries[entryId]
                         EntryDetailScreen(
                             entry = entry,
+                            viewModel = viewModel,
                             onNavigateBack = {
                                 navController.navigateUp()
                             }

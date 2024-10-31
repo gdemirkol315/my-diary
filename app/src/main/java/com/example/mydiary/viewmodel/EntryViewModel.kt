@@ -3,6 +3,7 @@ package com.example.mydiary.viewmodel
 import android.app.Application
 import android.net.Uri
 import android.util.Log
+import androidx.core.net.toUri
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -37,6 +38,8 @@ class EntryViewModel(application: Application) : AndroidViewModel(application) {
     private val _uiState = MutableStateFlow(EntryUiState())
     val uiState: StateFlow<EntryUiState> = _uiState.asStateFlow()
     private val imageStorageManager = ImageStorageManager(application.applicationContext)
+    private val _entryImages = MutableStateFlow<List<Uri>>(emptyList())
+    val entryImages: StateFlow<List<Uri>> = _entryImages.asStateFlow()
 
     init {
         var database: AppDatabase? = null
@@ -49,6 +52,10 @@ class EntryViewModel(application: Application) : AndroidViewModel(application) {
 
         entryRepository = EntryRepository(database!!.entryDao())
         entryImageRepository = EntryImageRepository(database.entryImageDao())
+    }
+
+    fun getEntryImages(): MutableStateFlow<List<Uri>> {
+        return _entryImages;
     }
 
     suspend fun loadEntries(): List<Entry> {
@@ -113,7 +120,6 @@ class EntryViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     suspend fun saveImage(entryId: Long, uri: Uri) {
-
         imageStorageManager.saveImage(uri)?.let { path ->
             val entryImage = EntryImage(
                 entryId = entryId,
@@ -121,7 +127,6 @@ class EntryViewModel(application: Application) : AndroidViewModel(application) {
             )
             entryImageRepository.insertEntryImage(entryImage)
         }
-
     }
 
     suspend fun deleteImage(entryImage: EntryImage) {
@@ -129,8 +134,23 @@ class EntryViewModel(application: Application) : AndroidViewModel(application) {
         entryImageRepository.deleteEntryImage(entryImage)
     }
 
-    fun getImagesForEntry(entryId: Long): List<EntryImage> {
-        return entryImageRepository.getEntryImagesById(entryId)
+    fun loadImagesForEntry(entryId: Long) {
+        viewModelScope.launch {
+            try {
+                entryImageRepository.getImagePathsForEntry(entryId)
+                    .collect { paths ->
+                        _entryImages.value = paths.map { it.toUri() }
+                    }
+            } catch (e: Exception) {
+                Log.e("EntryViewModel", "Error loading images for entry", e)
+                _entryImages.value = emptyList()
+            }
+        }
+    }
+
+    suspend fun deleteImageByUri(uri: Uri) {
+        imageStorageManager.deleteImage(uri.toString())
+        entryImageRepository.deleteEntryImageByUri(uri.toString())
     }
 
     companion object {

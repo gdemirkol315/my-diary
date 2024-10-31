@@ -1,6 +1,7 @@
 package com.example.mydiary.activities.entry.component
 
 import android.Manifest
+import android.app.Application
 import android.net.Uri
 import android.os.Build
 import android.util.Log
@@ -10,13 +11,11 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.mydiary.utils.manager.ImageManager
+import com.example.mydiary.viewmodel.EntryViewModel
 import com.google.accompanist.permissions.*
-
-enum class PermissionType {
-    CAMERA,
-    GALLERY
-}
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
@@ -27,7 +26,7 @@ fun ImagePickerComponent(
     val context = LocalContext.current
     var showImagePicker by remember { mutableStateOf(false) }
     val imageManager = remember { ImageManager(context) }
-
+    val scope = rememberCoroutineScope()
 
     val cameraPermission = rememberPermissionState(
         permission = Manifest.permission.CAMERA
@@ -40,7 +39,9 @@ fun ImagePickerComponent(
             Manifest.permission.READ_EXTERNAL_STORAGE
         }
     )
-
+    val viewModel: EntryViewModel = viewModel(
+        factory = EntryViewModel.provideFactory(context.applicationContext as Application)
+    )
 
     val galleryLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
@@ -109,15 +110,16 @@ fun ImagePickerComponent(
     }
 
     Column {
-        ImageCarousel(
+        ImageCarouselEdit(
             images = images,
             canAddMore = images.size < 3,
             onAddClick = { showImagePicker = true },
             onDeleteClick = { uri ->
-                onImagesChanged(images.filter { it != uri })
-            }
-        )
-
+                scope.launch { viewModel.deleteImageByUri(uri) }
+                onImagesChanged(
+                    images.filter { it != uri }
+                )
+            })
         if (showImagePicker) {
             ImagePickerDialog(
                 onDismiss = { showImagePicker = false },

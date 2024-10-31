@@ -30,10 +30,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -94,10 +96,67 @@ fun ImagePickerDialog(
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ImageCarousel(
+    images: List<Uri>
+) {
+    Column {
+        // Images or placeholder
+        if (!images.isEmpty()) {
+            Box(modifier = Modifier.height(200.dp)) {
+                // Carousel with images
+                var currentPage by remember { mutableStateOf(0) }
+
+                Column {
+                    Box(modifier = Modifier.weight(1f)) {
+                        HorizontalPager(
+                            state = rememberPagerState { images.size }
+                        ) { page ->
+                            Box {
+                                AsyncImage(
+                                    model = images[page],
+                                    contentDescription = null,
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentScale = ContentScale.Fit
+                                )
+                            }
+                        }
+                    }
+
+                    // Dot indicators
+                    Row(
+                        Modifier
+                            .height(50.dp)
+                            .fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        repeat(images.size) { iteration ->
+                            val color = if (currentPage == iteration) {
+                                MaterialTheme.colorScheme.primary
+                            } else {
+                                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                            }
+                            Box(
+                                modifier = Modifier
+                                    .padding(2.dp)
+                                    .clip(CircleShape)
+                                    .background(color)
+                                    .size(8.dp)
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun ImageCarouselEdit(
     images: List<Uri>,
     canAddMore: Boolean,
-    onAddClick: () -> Unit,
-    onDeleteClick: (Uri) -> Unit
+    onAddClick: () -> Unit = {},
+    onDeleteClick: (Uri) -> Unit = {}
 ) {
     Column {
         // Image count indicator
@@ -130,11 +189,19 @@ fun ImageCarousel(
             } else {
                 // Carousel with images
                 var currentPage by remember { mutableStateOf(0) }
+                val pagerState = rememberPagerState { images.size }
+
+                // This LaunchedEffect updates currentPage when pager scrolls
+                LaunchedEffect(pagerState) {
+                    snapshotFlow { pagerState.currentPage }.collect { page ->
+                        currentPage = page
+                    }
+                }
 
                 Column {
                     Box(modifier = Modifier.weight(1f)) {
                         HorizontalPager(
-                            state = rememberPagerState { images.size }
+                            state = pagerState
                         ) { page ->
                             Box {
                                 AsyncImage(
