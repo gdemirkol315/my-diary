@@ -48,7 +48,7 @@ fun ImagePickerComponent(
     ) { uri: Uri? ->
         uri?.let {
             if (images.size < 3) {
-                onImagesChanged(images + it)
+                onImagesChanged(images + uri)
             }
         }
     }

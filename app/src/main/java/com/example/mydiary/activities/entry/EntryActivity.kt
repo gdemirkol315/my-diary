@@ -29,7 +29,6 @@ fun EntryScreen(onNavigateBack: () -> Unit, entry: Entry? = null) {
     val uiState by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     var topbarText = ""
-    var images by remember { mutableStateOf<List<Uri>>(emptyList()) }
 
     LaunchedEffect(uiState.error) {
         //onCreate equivalent for composable
@@ -109,6 +108,9 @@ fun EntryScreen(onNavigateBack: () -> Unit, entry: Entry? = null) {
                     minLines = 5
                 )
                 val scope = rememberCoroutineScope()
+                if (entry != null)
+                    viewModel.loadImagesForEntry(entryId = entry.id)
+                var images = viewModel.entryImages.collectAsState().value
                 ImagePickerComponent(images = images, onImagesChanged = { images = it })
                 Button(
                     onClick = {
