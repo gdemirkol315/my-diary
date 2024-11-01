@@ -19,7 +19,6 @@ import com.example.mydiary.viewmodel.EntryViewModel
 import kotlinx.coroutines.launch
 import java.util.Date
 
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EntryScreen(onNavigateBack: () -> Unit, entry: Entry? = null) {
@@ -30,14 +29,18 @@ fun EntryScreen(onNavigateBack: () -> Unit, entry: Entry? = null) {
     val uiState by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     var topbarText = ""
+    val images by viewModel.entryImages.collectAsState()
 
-    LaunchedEffect(uiState.error) {
-        //onCreate equivalent for composable
+    LaunchedEffect(Unit) {
         if (entry != null) {
             viewModel.updateTitle(entry.title)
             viewModel.updateContent(entry.content)
+            viewModel.loadImagesForEntry(entry.id)
         }
-        topbarText =  entry?.let { "Edit Entry" } ?: "New Entry"
+        topbarText = entry?.let { "Edit Entry" } ?: "New Entry"
+    }
+
+    LaunchedEffect(uiState.error) {
         uiState.error?.let { error ->
             snackbarHostState.showSnackbar(
                 message = error,
@@ -45,7 +48,6 @@ fun EntryScreen(onNavigateBack: () -> Unit, entry: Entry? = null) {
             )
         }
     }
-
 
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
@@ -88,7 +90,7 @@ fun EntryScreen(onNavigateBack: () -> Unit, entry: Entry? = null) {
                         .padding(bottom = 16.dp)
                 )
                 var dateValue: Date = uiState.date
-                if (entry != null){
+                if (entry != null) {
                     dateValue = entry.date
                 }
                 OutlinedTextField(
@@ -112,35 +114,31 @@ fun EntryScreen(onNavigateBack: () -> Unit, entry: Entry? = null) {
                     minLines = 5
                 )
                 val scope = rememberCoroutineScope()
-                if (entry != null)
-                    viewModel.loadImagesForEntry(entryId = entry.id)
-                var images = viewModel.entryImages.collectAsState().value
-                ImagePickerComponent(images = images, onImagesChanged = { images = it })
+                
+                ImagePickerComponent(
+                    images = images,
+                    onImagesChanged = { newImages -> 
+                        scope.launch {
+                            viewModel.updateImages(newImages)
+                        }
+                    }
+                )
+                
                 Button(
                     onClick = {
                         if (entry != null && entry.id != 0L) {
                             viewModel.updateEntry(entry.id, onSuccess = {
                                 scope.launch {
-                                    saveImages(
-                                        viewModel,
-                                        entry.id,
-                                        images
-                                    )
+                                    saveImages(viewModel, entry.id, images)
                                 }
                                 onNavigateBack()
                             })
                         } else {
                             viewModel.saveEntry(onSuccess = { entryId: Long ->
-                                run {
-                                    scope.launch {
-                                        saveImages(
-                                            viewModel,
-                                            entryId,
-                                            images
-                                        )
-                                    }
-                                    onNavigateBack()
+                                scope.launch {
+                                    saveImages(viewModel, entryId, images)
                                 }
+                                onNavigateBack()
                             })
                         }
                     },
@@ -163,10 +161,8 @@ fun EntryScreen(onNavigateBack: () -> Unit, entry: Entry? = null) {
     }
 }
 
-
 suspend fun saveImages(viewModel: EntryViewModel, entryId: Long, images: List<Uri>) {
     if (images.isNotEmpty()) {
-
         for (image in images) {
             viewModel.saveImage(entryId, image)
         }

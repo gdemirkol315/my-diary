@@ -42,7 +42,7 @@ class ImageStorageManager(private val context: Context) {
     }
 
     // Delete image by path
-    suspend fun deleteImage(path: String) {
+    suspend fun dieleteImage(path: String) {
         withContext(Dispatchers.IO) {
             try {
                 File(path).delete()

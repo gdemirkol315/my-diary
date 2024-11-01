@@ -14,8 +14,6 @@ import com.example.mydiary.data.entities.EntryImage
 import com.example.mydiary.data.repository.EntryImageRepository
 import com.example.mydiary.utils.manager.ToastManager
 import com.example.mydiary.utils.manager.ToastType
-import com.example.mydiary.utils.manager.ImageStorageManager
-
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -37,9 +35,9 @@ class EntryViewModel(application: Application) : AndroidViewModel(application) {
     private val entryImageRepository: EntryImageRepository
     private val _uiState = MutableStateFlow(EntryUiState())
     val uiState: StateFlow<EntryUiState> = _uiState.asStateFlow()
-    private val imageStorageManager = ImageStorageManager(application.applicationContext)
     private val _entryImages = MutableStateFlow<List<Uri>>(emptyList())
     val entryImages: StateFlow<List<Uri>> = _entryImages.asStateFlow()
+    private val _originalImages = MutableStateFlow<Set<String>>(emptySet())
 
     init {
         var database: AppDatabase? = null
@@ -47,15 +45,30 @@ class EntryViewModel(application: Application) : AndroidViewModel(application) {
             database = AppDatabase.getDatabase(application)
         } catch (e: Exception) {
             Log.e("Database", "Error initializing database", e)
-            // Handle the error appropriately
         }
 
         entryRepository = EntryRepository(database!!.entryDao())
         entryImageRepository = EntryImageRepository(database.entryImageDao())
     }
 
-    fun getEntryImages(): MutableStateFlow<List<Uri>> {
-        return _entryImages;
+    suspend fun updateImages(newImages: List<Uri>) {
+        _entryImages.value = newImages
+    }
+
+    fun loadImagesForEntry(entryId: Long) {
+        viewModelScope.launch {
+            try {
+                entryImageRepository.getImagePathsForEntry(entryId)
+                    .collect { paths ->
+                        _originalImages.value = paths.toSet()
+                        _entryImages.value = paths.map { it.toUri() }
+                    }
+            } catch (e: Exception) {
+                Log.e("EntryViewModel", "Error loading images for entry", e)
+                _entryImages.value = emptyList()
+                _originalImages.value = emptySet()
+            }
+        }
     }
 
     suspend fun loadEntries(): List<Entry> {
@@ -120,37 +133,27 @@ class EntryViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     suspend fun saveImage(entryId: Long, uri: Uri) {
-        imageStorageManager.saveImage(uri)?.let { path ->
-            val entryImage = EntryImage(
-                entryId = entryId,
-                imagePath = path
-            )
-            entryImageRepository.insertEntryImage(entryImage)
-        }
-    }
-
-    suspend fun deleteImage(entryImage: EntryImage) {
-        imageStorageManager.deleteImage(entryImage.imagePath)
-        entryImageRepository.deleteEntryImage(entryImage)
-    }
-
-    fun loadImagesForEntry(entryId: Long) {
-        viewModelScope.launch {
-            try {
-                entryImageRepository.getImagePathsForEntry(entryId)
-                    .collect { paths ->
-                        _entryImages.value = paths.map { it.toUri() }
-                    }
-            } catch (e: Exception) {
-                Log.e("EntryViewModel", "Error loading images for entry", e)
-                _entryImages.value = emptyList()
+        try {
+            val uriString = uri.toString()
+            // Only save if it's not in the original images set
+            if (!_originalImages.value.contains(uriString)) {
+                val entryImage = EntryImage(
+                    entryId = entryId,
+                    imagePath = uriString
+                )
+                entryImageRepository.insertEntryImage(entryImage)
             }
+        } catch (e: Exception) {
+            Log.e("EntryViewModel", "Error saving image", e)
         }
     }
+
 
     suspend fun deleteImageByUri(uri: Uri) {
-        imageStorageManager.deleteImage(uri.toString())
         entryImageRepository.deleteEntryImageByUri(uri.toString())
+        val currentImages = _entryImages.value.toMutableList()
+        currentImages.remove(uri)
+        _entryImages.value = currentImages
     }
 
     companion object {
