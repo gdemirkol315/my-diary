@@ -17,6 +17,7 @@ import com.example.mydiary.data.entities.Entry
 import com.example.mydiary.utils.DateUtils
 import com.example.mydiary.viewmodel.EntryViewModel
 import kotlinx.coroutines.launch
+import java.util.Date
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -86,9 +87,12 @@ fun EntryScreen(onNavigateBack: () -> Unit, entry: Entry? = null) {
                         .fillMaxWidth()
                         .padding(bottom = 16.dp)
                 )
-
+                var dateValue: Date = uiState.date
+                if (entry != null){
+                    dateValue = entry.date
+                }
                 OutlinedTextField(
-                    value = DateUtils.reformatDateString(uiState.date.toString()),
+                    value = DateUtils.reformatDateString(dateValue.toString()),
                     onValueChange = { },
                     label = { Text("Date") },
                     enabled = false,
