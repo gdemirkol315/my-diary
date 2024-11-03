@@ -83,10 +83,10 @@ class EntryViewModel(application: Application) : AndroidViewModel(application) {
         _uiState.value = _uiState.value.copy(content = content)
     }
 
-    fun updateEntry(entryId: Long, onSuccess: () -> Unit) {
+    fun updateEntry(entry: Entry, onSuccess: () -> Unit) {
         viewModelScope.launch {
             try {
-                entryRepository.updateEntry(Entry(entryId, _uiState.value.title, _uiState.value.content, _uiState.value.date))
+                entryRepository.updateEntry(Entry(entry.id, _uiState.value.title, _uiState.value.content, entry.date))
                 ToastManager.showToast("Entry was edited successfully", ToastType.Info)
                 onSuccess()
             } catch (e: Exception){

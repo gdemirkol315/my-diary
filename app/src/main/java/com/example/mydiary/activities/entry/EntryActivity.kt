@@ -126,8 +126,8 @@ fun EntryScreen(onNavigateBack: () -> Unit, entry: Entry? = null) {
                 
                 Button(
                     onClick = {
-                        if (entry != null && entry.id != 0L) {
-                            viewModel.updateEntry(entry.id, onSuccess = {
+                        if (entry != null) {
+                            viewModel.updateEntry(entry, onSuccess = {
                                 scope.launch {
                                     saveImages(viewModel, entry.id, images)
                                 }
