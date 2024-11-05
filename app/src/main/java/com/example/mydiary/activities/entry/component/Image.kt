@@ -96,73 +96,9 @@ fun ImagePickerDialog(
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ImageCarousel(
-    images: List<Uri>
-) {
-    Column {
-        // Images or placeholder
-        if (!images.isEmpty()) {
-            Box(modifier = Modifier.height(200.dp)) {
-                // Carousel with images
-                var currentPage by remember { mutableStateOf(0) }
-                val pagerState = rememberPagerState { images.size }
-
-                // Add LaunchedEffect to update currentPage when pager scrolls
-                LaunchedEffect(pagerState) {
-                    snapshotFlow { pagerState.currentPage }.collect { page ->
-                        currentPage = page
-                    }
-                }
-
-                Column {
-                    Box(modifier = Modifier.weight(1f)) {
-                        HorizontalPager(
-                            state = pagerState
-                        ) { page ->
-                            Box {
-                                AsyncImage(
-                                    model = images[page],
-                                    contentDescription = null,
-                                    modifier = Modifier.fillMaxSize(),
-                                    contentScale = ContentScale.Fit
-                                )
-                            }
-                        }
-                    }
-
-                    // Dot indicators
-                    Row(
-                        Modifier
-                            .height(50.dp)
-                            .fillMaxWidth(),
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        repeat(images.size) { iteration ->
-                            val color = if (currentPage == iteration) {
-                                MaterialTheme.colorScheme.primary
-                            } else {
-                                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
-                            }
-                            Box(
-                                modifier = Modifier
-                                    .padding(2.dp)
-                                    .clip(CircleShape)
-                                    .background(color)
-                                    .size(8.dp)
-                            )
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-fun ImageCarouselEdit(
     images: List<Uri>,
-    canAddMore: Boolean,
+    isEditMode: Boolean,
+    canAddMore: Boolean = true,
     onAddClick: () -> Unit = {},
     onDeleteClick: (Uri) -> Unit = {}
 ) {
@@ -174,17 +110,19 @@ fun ImageCarouselEdit(
                 .padding(8.dp),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Text("Images (${images.size}/3)")
-            if (canAddMore) {
-                IconButton(onClick = onAddClick) {
-                    Icon(Icons.Default.Add, "Add image")
+            if (isEditMode) {
+                Text("Images (${images.size}/3)")
+                if (canAddMore) {
+                    IconButton(onClick = onAddClick) {
+                        Icon(Icons.Default.Add, "Add image")
+                    }
                 }
             }
         }
 
         // Images or placeholder
         Box(modifier = Modifier.height(200.dp)) {
-            if (images.isEmpty()) {
+            if (images.isEmpty() && isEditMode) {
                 // Placeholder when no images
                 Box(
                     modifier = Modifier
@@ -194,7 +132,7 @@ fun ImageCarouselEdit(
                 ) {
                     Text("No images added")
                 }
-            } else {
+            } else if (images.isNotEmpty()) {
                 // Carousel with images
                 var currentPage by remember { mutableStateOf(0) }
                 val pagerState = rememberPagerState { images.size }
@@ -218,6 +156,7 @@ fun ImageCarouselEdit(
                                     modifier = Modifier.fillMaxSize(),
                                     contentScale = ContentScale.Fit
                                 )
+                                if (isEditMode){
                                 // Delete button
                                 IconButton(
                                     onClick = { onDeleteClick(images[page]) },
@@ -229,6 +168,7 @@ fun ImageCarouselEdit(
                                         tint = androidx.compose.ui.graphics.Color.Red
                                     )
                                 }
+                                    }
                             }
                         }
                     }

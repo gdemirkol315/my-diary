@@ -110,8 +110,9 @@ fun ImagePickerComponent(
     }
 
     Column {
-        ImageCarouselEdit(
+        ImageCarousel(
             images = images,
+            isEditMode = true,
             canAddMore = images.size < 3,
             onAddClick = { showImagePicker = true },
             onDeleteClick = { uri ->

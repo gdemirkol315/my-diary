@@ -78,10 +78,11 @@ fun EntryDetailScreen(entry: Entry, viewModel: EntryViewModel, onNavigateBack: (
                 minLines = 5
             )
             viewModel.loadImagesForEntry(entryId = entry.id)
-            var images = viewModel.entryImages.collectAsState().value
+            val images = viewModel.entryImages.collectAsState().value
 
             ImageCarousel(
-                images = images
+                images = images,
+                isEditMode = false
             )
         }
     }
