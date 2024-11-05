@@ -104,11 +104,19 @@ fun ImageCarousel(
             Box(modifier = Modifier.height(200.dp)) {
                 // Carousel with images
                 var currentPage by remember { mutableStateOf(0) }
+                val pagerState = rememberPagerState { images.size }
+
+                // Add LaunchedEffect to update currentPage when pager scrolls
+                LaunchedEffect(pagerState) {
+                    snapshotFlow { pagerState.currentPage }.collect { page ->
+                        currentPage = page
+                    }
+                }
 
                 Column {
                     Box(modifier = Modifier.weight(1f)) {
                         HorizontalPager(
-                            state = rememberPagerState { images.size }
+                            state = pagerState
                         ) { page ->
                             Box {
                                 AsyncImage(
