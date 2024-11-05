@@ -98,7 +98,6 @@ fun ImagePickerDialog(
 fun ImageCarousel(
     images: List<Uri>,
     isEditMode: Boolean,
-    canAddMore: Boolean = true,
     onAddClick: () -> Unit = {},
     onDeleteClick: (Uri) -> Unit = {}
 ) {
@@ -112,7 +111,7 @@ fun ImageCarousel(
         ) {
             if (isEditMode) {
                 Text("Images (${images.size}/3)")
-                if (canAddMore) {
+                if (images.size < 3) {
                     IconButton(onClick = onAddClick) {
                         Icon(Icons.Default.Add, "Add image")
                     }

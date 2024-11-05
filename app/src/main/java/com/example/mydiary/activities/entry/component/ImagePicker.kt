@@ -113,7 +113,6 @@ fun ImagePickerComponent(
         ImageCarousel(
             images = images,
             isEditMode = true,
-            canAddMore = images.size < 3,
             onAddClick = { showImagePicker = true },
             onDeleteClick = { uri ->
                 scope.launch { viewModel.deleteImageByUri(uri) }
