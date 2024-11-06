@@ -38,12 +38,21 @@ android {
     buildFeatures {
         compose = true
     }
+    testOptions {
+        unitTests {
+            isIncludeAndroidResources = true
+            isReturnDefaultValues = true
+        }
+    }
 }
 
-//added bc of conflicting annotations error
 configurations.all {
     resolutionStrategy {
         force(libs.jetbrains.annotations.get())
+        force("org.jetbrains.kotlin:kotlin-stdlib:1.9.0")
+        force("org.jetbrains.kotlin:kotlin-stdlib-common:1.9.0")
+        force("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
+        force("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
     }
 }
 
@@ -71,7 +80,26 @@ dependencies {
     implementation(libs.androidx.material.icons.extended)
     implementation(libs.accompanist.permissions)
 
-    testImplementation(libs.junit)
+    // Testing dependencies
+    testImplementation("junit:junit:4.13.2")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
+    testImplementation("io.mockk:mockk:1.13.8")
+    testImplementation("io.mockk:mockk-android:1.13.8")
+    testImplementation("io.mockk:mockk-agent:1.13.8")
+    testImplementation("app.cash.turbine:turbine:1.0.0")
+    testImplementation("androidx.arch.core:core-testing:2.2.0")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
+    testImplementation("androidx.test:core:1.5.0")
+    testImplementation("androidx.test:runner:1.5.0")
+    testImplementation("androidx.test.ext:junit:1.1.5")
+    testImplementation("org.robolectric:robolectric:4.11.1")
+    testImplementation("androidx.lifecycle:lifecycle-runtime-testing:2.6.2")
+    testImplementation("org.jetbrains.kotlin:kotlin-test:1.9.0")
+    testImplementation("org.jetbrains.kotlin:kotlin-test-junit:1.9.0")
+    testImplementation("androidx.arch.core:core-testing:2.2.0")
+    testImplementation("org.jetbrains.kotlin:kotlin-reflect:1.9.0")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+    
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
