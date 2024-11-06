@@ -2,63 +2,59 @@ package com.example.mydiary.viewmodel
 
 import android.app.Application
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import com.example.mydiary.data.dao.EntryDao
-import com.example.mydiary.data.dao.EntryImageDao
-import com.example.mydiary.data.database.AppDatabase
 import com.example.mydiary.data.entities.Entry
-import com.example.mydiary.utils.manager.ToastManager
+import com.example.mydiary.data.repository.EntryRepository
 import io.mockk.coEvery
-import io.mockk.every
-import io.mockk.impl.annotations.MockK
 import io.mockk.mockk
+import io.mockk.slot
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertNull
-import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 import java.util.Date
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 @OptIn(ExperimentalCoroutinesApi::class)
+@RunWith(RobolectricTestRunner::class)
+@Config(manifest = Config.NONE, sdk = [33])
 class EntryViewModelTest {
     @get:Rule
     val instantExecutorRule = InstantTaskExecutorRule()
 
     private val testDispatcher = StandardTestDispatcher()
-
-    @MockK
+    private lateinit var repository: EntryRepository
     private lateinit var application: Application
-
-    @MockK
-    private lateinit var database: AppDatabase
-
-    @MockK
-    private lateinit var entryDao: EntryDao
-
-    @MockK
-    private lateinit var entryImageDao: EntryImageDao
-
     private lateinit var viewModel: EntryViewModel
 
     @Before
     fun setup() {
-        io.mockk.MockKAnnotations.init(this)
         Dispatchers.setMain(testDispatcher)
         
-        every { database.entryDao() } returns entryDao
-        every { database.entryImageDao() } returns entryImageDao
-        every { AppDatabase.getDatabase(application) } returns database
+        // Create mocks
+        repository = mockk(relaxed = true)
+        application = mockk(relaxed = true)
         
+        // Initialize ViewModel with mocked dependencies
         viewModel = EntryViewModel(application)
+        
+        // Use reflection to inject mocked repository
+        val field = EntryViewModel::class.java.getDeclaredField("entryRepository")
+        field.isAccessible = true
+        field.set(viewModel, repository)
     }
 
     @After
@@ -73,7 +69,7 @@ class EntryViewModelTest {
             Entry(id = 1, title = "Test 1", content = "Content 1", date = Date()),
             Entry(id = 2, title = "Test 2", content = "Content 2", date = Date())
         )
-        every { entryDao.getAllEntries() } returns flowOf(entries)
+        coEvery { repository.getAllEntries() } returns flowOf(entries)
 
         // When
         val result = viewModel.loadEntries()
@@ -110,7 +106,8 @@ class EntryViewModelTest {
     fun `saveEntry saves entry and calls onSuccess with entry id`() = runTest {
         // Given
         val expectedId = 1L
-        coEvery { entryDao.insertEntry(any()) } returns expectedId
+        val entrySlot = slot<Entry>()
+        coEvery { repository.insertEntry(capture(entrySlot)) } returns expectedId
 
         var successCalled = false
         var returnedId = 0L
@@ -120,25 +117,31 @@ class EntryViewModelTest {
             successCalled = true
             returnedId = entryId
         }
+        
+        // Wait for all coroutines to complete
+        advanceUntilIdle()
 
         // Then
-        assertTrue("Success callback was not called", successCalled)
-        assertEquals("Returned ID does not match expected ID", expectedId, returnedId)
-        assertFalse("Loading state should be false", viewModel.uiState.value.isLoading)
-        assertNull("Error should be null", viewModel.uiState.value.error)
+        assertTrue(successCalled, "Success callback was not called")
+        assertEquals(expectedId, returnedId, "Returned ID does not match expected ID")
+        assertFalse(viewModel.uiState.value.isLoading, "Loading state should be false")
+        assertNull(viewModel.uiState.value.error, "Error should be null")
     }
 
     @Test
     fun `saveEntry handles error appropriately`() = runTest {
         // Given
         val errorMessage = "Error saving entry"
-        coEvery { entryDao.insertEntry(any()) } throws RuntimeException(errorMessage)
+        coEvery { repository.insertEntry(any()) } throws RuntimeException(errorMessage)
 
         // When
         viewModel.saveEntry { }
+        
+        // Wait for all coroutines to complete
+        advanceUntilIdle()
 
         // Then
-        assertFalse("Loading state should be false", viewModel.uiState.value.isLoading)
-        assertEquals("Error message does not match", errorMessage, viewModel.uiState.value.error)
+        assertFalse(viewModel.uiState.value.isLoading, "Loading state should be false")
+        assertEquals(errorMessage, viewModel.uiState.value.error, "Error message does not match")
     }
 }
